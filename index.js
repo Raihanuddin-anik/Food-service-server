@@ -22,7 +22,7 @@ client.connect(err => {
     StudentCollection.insertOne(Order)
       .then(result => {
         console.log(result)
-        res.send(result.insertedCount > 0)
+        res.send(result.acknowledged)
 
       })
 
@@ -32,7 +32,7 @@ client.connect(err => {
     FoodCollection.insertOne(Order)
       .then(result => {
         console.log(result)
-        res.send(result.insertedCount > 0)
+        res.send(result.acknowledged)
 
       })
 
@@ -45,7 +45,12 @@ client.connect(err => {
         res.send(result.insertedCount > 0)
 
       })
-
+  })
+  app.get('/delivered', (req, res) => {
+    FoodDistribution.find({})
+      .toArray((err, document) => {
+        res.send(document)
+      })
   })
   app.get('/students', (req, res) => {
     StudentCollection.find({})
@@ -66,13 +71,14 @@ client.connect(err => {
     StudentCollection.updateOne({ _id: ObjectId(req.params.id) },
 
       {
-        $set: { sId: req.body.data.sId, 
-              sName: req.body.data.sName ,
-              roll: req.body.data.roll ,
-              age: req.body.data.age ,
-              class: req.body.data.class ,
-              hall: req.body.data.hall ,
-              status: req.body.data.status ,
+        $set: {
+          sId: req.body.data.sId,
+          sName: req.body.data.sName,
+          roll: req.body.data.roll,
+          age: req.body.data.age,
+          class: req.body.data.class,
+          hall: req.body.data.hall,
+          status: req.body.data.status,
         }
 
       })
@@ -87,6 +93,20 @@ client.connect(err => {
         res.send(documents[0])
       })
   })
+
+  app.delete('/delete/:id', (req, res) => {
+    StudentCollection.deleteOne({ _id: ObjectId(req.params.id) })
+      .then(result => {
+        res.send(result.deletedCount > 0)
+      })
+  })
+  app.delete('/deleteServed/:id', (req, res) => {
+    FoodDistribution.deleteOne({ _id: ObjectId(req.params.id) })
+      .then(result => {
+        res.send(result.deletedCount > 0)
+      })
+  })
+
 
 });
 app.listen(process.env.PORT || 4000);
